@@ -11,5 +11,14 @@ func (s HandshakeDeadlineService) Execute(ctx context.Context, action func(conte
 	if ctx == nil {
 		return fmt.Errorf("handshakedeadline: nil context")
 	}
-	return action(context.Background())
+	if err := ctx.Err(); err != nil {
+		return fmt.Errorf("handshakedeadline before action: %w", err)
+	}
+	if err := action(ctx); err != nil {
+		return fmt.Errorf("handshakedeadline action: %w", err)
+	}
+	if err := ctx.Err(); err != nil {
+		return fmt.Errorf("handshakedeadline after action: %w", err)
+	}
+	return nil
 }
